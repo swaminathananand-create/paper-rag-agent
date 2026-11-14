@@ -1,0 +1,31 @@
+# Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks
+
+Authors: Patrick Lewis, Ethan Perez, Aleksandara Piktus, Fabio Petroni, Vladimir Karpukhin, Naman Goyal, Heinrich Kuttler, Mike Lewis, Wen-tau Yih, Tim Rocktaschel, Sebastian Riedel, Douwe Kiela
+Affiliation: Facebook AI Research, University College London, New York University
+Year: 2020
+
+## Abstract
+Large pre-trained language models have been shown to store factual knowledge in their parameters, achieving state-of-the-art results when fine-tuned on downstream NLP tasks. However, their ability to precisely access and manipulate knowledge is still limited, and on knowledge-intensive tasks, their performance falls behind task-specific architectures. In addition, providing provenance for their decisions and updating their world knowledge remain challenging. In this paper, we explore a general-purpose fine-tuning recipe for Retrieval-Augmented Generation (RAG) — models which combine pre-trained parametric and non-parametric memory for language generation. We introduce RAG models where the parametric memory is a pre-trained seq2seq model and the non-parametric memory is a dense vector index of Wikipedia, accessed with a pre-trained neural retriever.
+
+## 1. Introduction and Main Argument
+Pre-trained neural language models learn a substantial amount of in-depth world knowledge from raw text. However, parametric-only models suffer from several distinct drawbacks: they cannot easily expand or revise their memory without full retraining, they are prone to hallucinating plausible but incorrect facts, and they cannot produce verifiable citations or provenance for their assertions.
+Our main argument is that decoupling knowledge representation into non-parametric memory (retrieval corpus) and parametric memory (sequence generation network) creates a superior architecture for knowledge-intensive NLP. Combining pre-trained seq2seq models with a dense retriever trained end-to-end yields both generation fluency and empirical factual reliability.
+
+## 2. Methodology & Architecture
+Our RAG architecture consists of two main components:
+1. Retriever: A Dense Passage Retriever (DPR) utilizing a bi-encoder architecture based on BERT. Given an input sequence x, DPR computes dense inner-product representations between query and passage vectors to retrieve the top-k document passages z from a Wikipedia dump indexed using FAISS.
+2. Generator: A pre-trained BART-large sequence-to-sequence model that conditions on both the input sequence x and the retrieved documents z to generate target text y.
+We introduce two variants:
+- RAG-Sequence: Uses the same retrieved documents across the entire generated sequence.
+- RAG-Token: Allows the model to attend to different document passages at each individual token step of the generation sequence.
+The entire system is trained end-to-end, backpropagating gradients from the generator loss back into the query encoder of the retriever.
+
+## 3. Experimental Evaluation and Key Findings
+We evaluate RAG across open-domain question answering (Natural Questions, TriviaQA, WebQuestions, CuratedTREC), abstractive question answering (MS-MARCO), Jeopardy question generation, and fact verification (FEVER).
+Key findings include:
+- RAG sets new state-of-the-art results on open-domain QA benchmarks, significantly outperforming purely parametric models (T5-11B) while requiring substantially fewer parameters.
+- Generation factual accuracy: In human evaluation on open-domain generation, RAG's generations are rated as significantly more factual and specific than BART baselines.
+- Non-parametric hot-swapping: When the world knowledge changes, updating the underlying Wikipedia index instantly updates RAG's answers without retraining the parametric model.
+
+## 4. Implications & Practical Significance
+RAG establishes the foundational blueprint for modern knowledge-grounded AI systems. By combining non-parametric neural search with parametric generation, RAG bridges the gap between structured search and natural language generation. Key implications include massive reductions in hallucination, direct inspectability of source documents, and drastically simplified model maintenance in enterprise environments.

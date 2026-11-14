@@ -1,0 +1,32 @@
+# Self-RAG: Learning to Retrieve, Generate, and Critique Through Self-Reflection
+
+Authors: Akari Asai, Zeqiu Wu, Yizhong Wang, Avirup Sil, Hannaneh Hajishirzi
+Affiliation: University of Washington, IBM Research
+Year: 2023
+
+## Abstract
+Despite the promise of Retrieval-Augmented Generation (RAG), existing methods retrieve passages indiscriminately regardless of whether retrieval is necessary, and generate outputs without verifying grounding against retrieved passages. We introduce Self-RAG, a framework that trains an arbitrary LM to adaptively retrieve passages on-demand, and generate and reflect on retrieved passages and its own generation using special tokens called reflection tokens. A single Self-RAG model dynamically decides when to retrieve passages, evaluates whether retrieved passages are relevant, assesses whether its generations are supported by the passages, and rates whether the overall response is useful. Experiments show Self-RAG significantly outperforms RAG and instruction-tuned baselines on diverse tasks.
+
+## 1. Introduction and Main Argument
+Standard RAG models apply retrieval uniformly, even when generation does not benefit from additional context. More critically, they cannot self-assess whether their generated output is adequately grounded in the retrieved material. Our main argument is that a language model trained to criticize its own generation process through explicit reflection tokens introduces a principled self-regulation mechanism: the model learns to retrieve selectively, evaluate retrieved material critically, and verify factual grounding in a single unified framework.
+
+## 2. Methodology & Technical Approach
+Self-RAG employs a two-phase training approach:
+Phase 1 - Critic LM Training: A separate "Critic LM" is trained using GPT-4-generated preference data to predict four types of reflection tokens:
+- Retrieve token: [Retrieve] vs. [No Retrieve] — determines if retrieval is needed.
+- ISREL token: [Relevant] vs. [Irrelevant] — evaluates retrieved passage relevance.
+- ISSUP token: [Fully Supported] / [Partially Supported] / [No Support] — evaluates factual grounding.
+- ISUSE token: [Utility 1-5] — rates overall response usefulness.
+Phase 2 - Generator LM Fine-Tuning: The generator LM (Llama-2, 7B/13B) is fine-tuned with the Critic LM's reflection tokens interleaved directly into the training sequences.
+At inference time, Self-RAG uses beam search over segment-level token sequences, selecting output segments based on a composite score of reflection token predictions.
+
+## 3. Key Findings
+Self-RAG (Llama-2 13B) outperforms both ChatGPT and standard RAG models on:
+- PopQA (long-tail entity factuality): 72.4% vs. 65.3% for GPT-3.5-turbo RAG
+- ASQA (long-form QA): 34.9 EM vs. 26.2 for standard retrieval-augmented Llama-2
+- FEVER (fact verification): 77.1% accuracy vs. 70.1% for RAG baselines
+- PubHealth (biomedical claims): 75.4% accuracy, substantially better than GPT-4 (65.1%)
+Self-RAG demonstrates that selective retrieval consistently outperforms indiscriminate retrieval, with 15-25% relative improvement in citation precision.
+
+## 4. Implications & Significance
+Self-RAG represents a significant architectural maturation of RAG systems: from static pipeline retrieval to self-regulating, reflective generation. It demonstrates that factuality verification can be embedded within the generation model itself, not just externally. This has direct implications for deploying trustworthy AI systems in high-stakes domains (medicine, law, finance) where citation precision and hallucination resistance are mandatory. Key limitation: training the Critic LM requires large-scale GPT-4 annotation, representing substantial upfront cost.

@@ -1,0 +1,29 @@
+# Chain-of-Thought Prompting Elicits Reasoning in Large Language Models
+
+Authors: Jason Wei, Xuezhi Wang, Dale Schuurmans, Maarten Bosma, Brian Ichter, Fei Xia, Ed Chi, Quoc Le, Denny Zhou
+Affiliation: Google Research, Google Brain
+Year: 2022
+
+## Abstract
+We explore how generating a chain of thought — a series of intermediate natural language reasoning steps — significantly improves the ability of large language models to perform complex reasoning. A sufficiently large language model, given chain-of-thought exemplars via few-shot prompting, can produce chains of thought that lead to dramatically better performance on math word problems, commonsense reasoning, and symbolic manipulation tasks. Chain-of-thought prompting is an emergent property that appears robustly only in sufficiently large models (>100B parameters), and represents a surprisingly simple technique that substantially alters the reasoning landscape for LLMs.
+
+## 1. Introduction and Main Argument
+Standard few-shot prompting provides input-output pairs as exemplars. Our central argument is that by instead providing intermediate reasoning steps as exemplars — i.e., annotated chains of thought — we elicit a qualitatively different reasoning capability from large language models. The model is encouraged to decompose complex problems into explicit, linearized reasoning sub-steps before arriving at a final answer, leading to dramatically superior performance on multi-step tasks that are intractable under direct answer prediction.
+
+## 2. Methodology & Experimental Design
+We evaluate chain-of-thought prompting across 3 broad reasoning categories:
+1. Arithmetic Word Problems: GSM8K, SVAMP, ASDiv, AQuA, MAWPS datasets.
+2. Commonsense Reasoning: CommonsenseQA, StrategyQA, Date Understanding, Sports Understanding.
+3. Symbolic Reasoning: Last Letter Concatenation, Coin Flip.
+Models evaluated include GPT-3 variants (6.7B, 13B, 175B parameters), PaLM (8B, 62B, 540B), and LaMDA.
+Key methodological insight: Chain-of-thought annotation style strictly follows the pattern: [Question → Reasoning Steps → Answer], where reasoning steps are written in natural language mirroring informal human mathematical/logical reasoning.
+
+## 3. Key Findings
+Chain-of-thought prompting dramatically outperforms standard few-shot prompting on complex reasoning:
+- On GSM8K (grade school math), PaLM 540B with chain-of-thought achieves 56.9% accuracy, compared to 17.9% with standard prompting.
+- Chain-of-thought is an emergent property: it provides essentially zero improvement for models below ~100B parameters and then sharply increases in effectiveness at scale.
+- Ablation analysis demonstrates that intermediate steps must be semantically coherent; randomly shuffled or incorrect steps substantially degrade performance.
+- Chain-of-thought remains effective across domains without task-specific fine-tuning, validating its broad applicability.
+
+## 4. Implications & Significance
+Chain-of-thought prompting fundamentally shifted the understanding of what is achievable with prompt engineering alone. By revealing that intermediate reasoning steps are a powerful inductive bias for large models, this work established the intellectual groundwork for self-consistency, tree-of-thought, process supervision, and ultimately agentic reasoning paradigms (ReAct, Reflexion). A key limitation is the strong scale dependency: smaller, deployable models derive minimal benefit without fine-tuning.
